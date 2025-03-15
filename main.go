@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -87,9 +88,21 @@ func uploadFileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Retrieve the script to execute
+	script := r.FormValue("script")
+	if script != "" {
+		// Run the script after extraction
+		err := runScript(script, targetDir)
+		if err != nil {
+			http.Error(w, "Error running the script", http.StatusInternalServerError)
+			log.Println("Error running the script:", err)
+			return
+		}
+	}
+
 	// Respond with success
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "File uploaded and extracted successfully to %s", targetDir)
+	fmt.Fprintf(w, "File uploaded, extracted, and script executed successfully in %s", targetDir)
 }
 
 // Function to extract ZIP file to a directory
@@ -142,6 +155,22 @@ func extractZip(zipFilePath, targetDir string) error {
 		}
 	}
 
+	return nil
+}
+
+// Function to run the script on the extracted directory
+func runScript(script, targetDir string) error {
+	// Prepare the script with target directory if needed
+	cmd := exec.Command("sh", "-c", script)
+	cmd.Dir = targetDir
+
+	// Run the script
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("error executing script: %v\nOutput: %s", err, output)
+	}
+
+	log.Printf("Script executed successfully: %s", output)
 	return nil
 }
 
