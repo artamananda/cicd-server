@@ -19,7 +19,7 @@ cd ..
 ```bash
 cd build
 pm2 start package.json
-./
+cd ..
 ```
 
 ### Run Binary File Directly
@@ -27,18 +27,12 @@ pm2 start package.json
 ```bash
 cd build
 ./http-remote-access
-./
-```
-
-For Example:
-
-```bash
-./http-remote-access
 ```
 
 If you're on Windows:
 
 ```bash
+cd build
 http-remote-access.exe
 ```
 
