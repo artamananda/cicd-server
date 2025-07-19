@@ -14,12 +14,19 @@ select arch in amd64 arm64 arm386; do
   fi
 done
 
-output_name="cicd-server-${os}-${arch}"
+# output_name="http-remote-access-${os}-${arch}"
+output_name="http-remote-access"
 if [ "$os" == "windows" ]; then
   output_name="${output_name}.exe"
 fi
 
-rm -rf ../build
+if [ -d "../build" ]; then
+  echo "Removing existing build directory..."
+  rm -rf ../build
+else
+  echo "Creating build directory..."
+  mkdir -p ../build
+fi
 
 echo "Building for GOOS=$os and GOARCH=$arch..."
 GOOS=$os GOARCH=$arch go build -o "../build/${output_name}" ../main.go
