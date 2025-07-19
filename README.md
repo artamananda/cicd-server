@@ -1,6 +1,6 @@
 # 🚀 Alternate Method for Linux Deployment Without SSH Access
 
-This app allows you to deploy your application using GitHub Actions without requiring SSH access. The process involves sending your binary file to the server, where the app will receive it and execute the commands you specify.
+This app allows you to deploy your application using GitHub Actions over http without requiring SSH access. The process involves sending your binary file to the server, where the app will receive it and execute the commands you specify.
 
 # How to Build, Install and Run
 
@@ -26,20 +26,20 @@ pm2 start package.json
 
 ```bash
 cd build
-./cicd-server-<os>-<arch>
+./http-remote-access
 ./
 ```
 
 For Example:
 
 ```bash
-./cicd-server-linux-arm64
+./http-remote-access
 ```
 
 If you're on Windows:
 
 ```bash
-cicd-server-windows-amd64.exe
+http-remote-access.exe
 ```
 
 # 🌐 API Access
@@ -60,7 +60,7 @@ Upload a ZIP file which will be extracted on the server.
 ### Example using curl:
 
 ```bash
-curl -X POST http://<server-ip>:8001/upload-only \
+curl -X POST http://<your-domain>/upload-only \
   -F "file=@./your-archive.zip" \
   -F "target=/path/to/extract"
 ```
@@ -78,7 +78,7 @@ Upload a ZIP file, extract it, then run a shell script.
 ### Example using curl:
 
 ```bash
-curl -X POST http://<server-ip>:8001/upload-only \
+curl -X POST http://<your-domain>/upload-only \
   -F "file=@./your-archive.zip" \
   -F "target=/path/to/extract" \
   -F "script=./deploy.sh"
@@ -95,6 +95,6 @@ Run a shell script on the server without uploading anything.
 ### Example using curl:
 
 ```bash
-curl -X POST http://<server-ip>:8001/upload-only \
+curl -X POST http://<your-domain>/upload-only \
   -d "script=./deploy.sh" \
 ```
