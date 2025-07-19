@@ -1,8 +1,0 @@
-{
-  "apps": [
-    {
-      "name": "cicd-server-arm64",
-      "script": "./cicd-server-arm64"
-    }
-  ]
-}

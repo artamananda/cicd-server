@@ -1,0 +1,44 @@
+#!/bin/bash
+
+echo "Select target OS:"
+select os in linux windows darwin; do
+  if [[ -n "$os" ]]; then
+    break
+  fi
+done
+
+echo "Select target architecture:"
+select arch in amd64 arm64 arm386; do
+  if [[ -n "$arch" ]]; then
+    break
+  fi
+done
+
+output_name="cicd-server-${os}-${arch}"
+if [ "$os" == "windows" ]; then
+  output_name="${output_name}.exe"
+fi
+
+rm -rf ../build
+
+echo "Building for GOOS=$os and GOARCH=$arch..."
+GOOS=$os GOARCH=$arch go build -o "../build/${output_name}" ../main.go
+
+cat > ../build/package.json <<EOF
+{
+  "apps": [
+    {
+      "name": "${output_name}",
+      "script": "./${output_name}"
+    }
+  ]
+}
+EOF
+
+echo "package.json has been generated."
+
+if [ $? -eq 0 ]; then
+  echo "Build successful: ../build/${output_name}"
+else
+  echo "Build failed."
+fi
