@@ -36,9 +36,6 @@ func uploadOnlyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintln(w, "[INFO] Starting upload process")
-	flusher.Flush()
-
 	err := r.ParseMultipartForm(500 << 20)
 	if err != nil {
 		http.Error(w, "[ERR] Error parsing form", http.StatusBadRequest)
@@ -60,6 +57,10 @@ func uploadOnlyHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("[ERR] Target directory is required")
 		return
 	}
+
+	// Now safe to write response and flush because input is validated
+	fmt.Fprintln(w, "[INFO] Starting upload process")
+	flusher.Flush()
 
 	fmt.Fprintf(w, "[INFO] Uploading %s to %s\n", fileHeader.Filename, targetDir)
 	flusher.Flush()
@@ -86,9 +87,6 @@ func uploadWithScriptHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
 	}
-
-	fmt.Fprintln(w, "[INFO] Starting upload + script execution")
-	flusher.Flush()
 
 	err := r.ParseMultipartForm(500 << 20)
 	if err != nil {
@@ -118,6 +116,10 @@ func uploadWithScriptHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("[ERR] Script is required")
 		return
 	}
+
+	// Now safe to write response and flush because input is validated
+	fmt.Fprintln(w, "[INFO] Starting upload + script execution")
+	flusher.Flush()
 
 	fmt.Fprintf(w, "[INFO] Uploading %s to %s\n", fileHeader.Filename, targetDir)
 	flusher.Flush()
@@ -203,6 +205,16 @@ func saveAndExtractZipStream(w http.ResponseWriter, flusher http.Flusher, file i
 	err = extractZipStream(w, flusher, zipPath, targetDir)
 	if err != nil {
 		return fmt.Errorf("extract failed: %v", err)
+	}
+
+	// Delete the zip file after successful extraction
+	err = os.Remove(zipPath)
+	if err != nil {
+		// Just log error but don’t fail
+		log.Printf("[WARN] Failed to delete zip file %s: %v", zipPath, err)
+	} else {
+		fmt.Fprintf(w, "[INFO] Deleted zip file %s\n", zipPath)
+		flusher.Flush()
 	}
 
 	return nil
